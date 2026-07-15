@@ -55,7 +55,7 @@ function ProductCard({
           <p className="absolute bottom-0 left-0 text-[9px] text-slate-800 leading-none truncate max-w-[60%]">
             {barcode}
           </p>
-          <p className="absolute bottom-3 right-0 text-[18px] font-extrabold text-[#FF0000] leading-none tracking-tight whitespace-nowrap">
+          <p className="absolute bottom-1 right-0 text-[18px] font-extrabold text-[#FF0000] leading-none tracking-tight whitespace-nowrap">
             {price}
           </p>
         </div>

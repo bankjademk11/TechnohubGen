@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import ColumnMappingUI from "@/components/ColumnMappingUI";
 import { useLocation } from "wouter";
+import { generatePPTXClient } from "@/lib/pptx-client-generator";
 
 const TECHNOHUB_LOGO = "/techno-hub-logo.jpg";
 
@@ -73,7 +74,7 @@ function ProductCard({
           <p className="absolute bottom-0 left-0 text-[9px] text-slate-800 leading-none truncate max-w-[60%]">
             {barcode}
           </p>
-          <p className="absolute bottom-3 right-0 text-[18px] font-extrabold text-[#FF0000] leading-none tracking-tight whitespace-nowrap">
+          <p className="absolute bottom-1 right-0 text-[18px] font-extrabold text-[#FF0000] leading-none tracking-tight whitespace-nowrap">
             {price}
           </p>
         </div>
@@ -361,25 +362,11 @@ export default function Generator() {
         barcode: String(row[columnMapping.barcode] || ""),
       }));
 
-      const result = await generateMutation.mutateAsync({ products });
-
-      // Download the file
-      const binaryString = atob(result.data);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-      const blob = new Blob([bytes], {
-        type: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      // Generate PPTX entirely on the client side!
+      await generatePPTXClient(products, (progress) => {
+        // Optional: you could set progress state here if you add a progress bar
+        console.log(`Generating: ${progress.toFixed(0)}%`);
       });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = result.filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
 
       toast.success("PPTX generated and downloaded successfully!");
       setStep("upload");

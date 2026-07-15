@@ -69,7 +69,7 @@ def load_template_specs():
                 "font_bold": True,
                 "color_hex": "FF0000",
                 "position_left_emu": 1000000,
-                "position_top_emu": 1050000,
+                "position_top_emu": 1100000,
                 "width_emu": 1484041,
                 "height_emu": 280000,
             },
