@@ -1,0 +1,71 @@
+{
+  "slide": {
+    "width_emu": 10691813,
+    "height_emu": 7559675,
+    "width_inches": 10,
+    "height_inches": 7.5
+  },
+  "card": {
+    "width_emu": 2554041,
+    "height_emu": 1459469,
+    "columns_per_row": 4,
+    "rows_per_slide": 5,
+    "margin_left_emu": 266700,
+    "margin_top_emu": 190914,
+    "spacing_horizontal_emu": 0,
+    "spacing_vertical_emu": 0
+  },
+  "logo": {
+    "width_emu": 2282266,
+    "height_emu": 420793,
+    "position_left_emu": 69643,
+    "position_top_emu": 676737
+  },
+  "text_elements": {
+    "lao_name": {
+      "font_size_pt": 13,
+      "color": "000000",
+      "position_left_emu": 913665,
+      "position_top_emu": 2675724,
+      "width_emu": 6385187,
+      "height_emu": 554968
+    },
+    "barcode": {
+      "font_size_pt": 10,
+      "color": "000000",
+      "position_left_emu": 894217,
+      "position_top_emu": 4410312,
+      "width_emu": 2864990,
+      "height_emu": 554968
+    },
+    "price": {
+      "font_size_pt": 19,
+      "font_bold": true,
+      "color": "FF0000",
+      "position_left_emu": 894543,
+      "position_top_emu": 1608039,
+      "width_emu": 1652479,
+      "height_emu": 357792
+    },
+    "english_name": {
+      "font_size_pt": 10,
+      "color": "6499DE",
+      "position_left_emu": 28138,
+      "position_top_emu": 1385224,
+      "width_emu": 2014224,
+      "height_emu": 223140
+    }
+  },
+  "colors": {
+    "price_red": "FF0000",
+    "english_blue": "6499DE",
+    "border_blue": "4472C4",
+    "border_grey": "D0CECE",
+    "white": "FFFFFF"
+  },
+  "grid_layout": {
+    "cards_per_slide": 20,
+    "cards_per_row": 4,
+    "cards_per_column": 5
+  }
+}
