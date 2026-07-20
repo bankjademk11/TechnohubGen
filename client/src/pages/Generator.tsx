@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { Upload, Loader2, ArrowLeft, Search } from "lucide-react";
+import { Upload, Loader2, ArrowLeft, Search, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
@@ -37,14 +37,17 @@ function ProductCard({
   englishName,
   price,
   barcode,
+  tagMode = "standard",
 }: {
   laoName: string;
   englishName: string;
   price: string;
   barcode: string;
+  tagMode?: "standard" | "long";
 }) {
   return (
-    <div className="bg-white border-2 border-slate-900 rounded-none flex flex-col justify-between aspect-[1.75/1] select-none shadow-sm h-full overflow-hidden">
+    <div className={`bg-white border-2 border-slate-900 rounded-none flex flex-col justify-between select-none shadow-sm h-full overflow-hidden ${tagMode === "long" ? "aspect-[2.54/1]" : "aspect-[1.75/1]"
+      }`}>
       {/* Top section: Logo */}
       <div className="px-2 pt-2 pb-1.5 flex items-center justify-start">
         <img
@@ -137,6 +140,7 @@ export default function Generator() {
   const [selectedSheet, setSelectedSheet] = useState<string>("");
   const [sheetSearch, setSheetSearch] = useState("");
   const [previewPage, setPreviewPage] = useState(0);
+  const [tagMode, setTagMode] = useState<"standard" | "long">("standard");
 
   const generateMutation = trpc.pptx.generate.useMutation();
 
@@ -363,7 +367,7 @@ export default function Generator() {
       }));
 
       // Generate PPTX entirely on the client side!
-      await generatePPTXClient(products, (progress) => {
+      await generatePPTXClient(products, tagMode, (progress) => {
         // Optional: you could set progress state here if you add a progress bar
         console.log(`Generating: ${progress.toFixed(0)}%`);
       });
@@ -447,8 +451,8 @@ export default function Generator() {
                     key={name}
                     onClick={() => setSelectedSheet(name)}
                     className={`w-full text-left px-5 py-4 rounded-lg border-2 transition-all flex items-center gap-3 ${selectedSheet === name
-                        ? "border-blue-500 bg-blue-50 text-blue-700 font-semibold"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-blue-300"
+                      ? "border-blue-500 bg-blue-50 text-blue-700 font-semibold"
+                      : "border-slate-200 bg-white text-slate-700 hover:border-blue-300"
                       }`}
                   >
                     <span className="text-lg">📄</span>
@@ -512,18 +516,18 @@ export default function Generator() {
                     <div
                       key={letter}
                       className={`p-3 rounded-lg border ${isEmpty
-                          ? "border-red-200 bg-red-50"
-                          : pct > 50
-                            ? "border-green-200 bg-green-50"
-                            : "border-yellow-200 bg-yellow-50"
+                        ? "border-red-200 bg-red-50"
+                        : pct > 50
+                          ? "border-green-200 bg-green-50"
+                          : "border-yellow-200 bg-yellow-50"
                         }`}
                     >
                       <div className="flex items-center gap-1.5 mb-1">
                         <span className="font-bold text-xs text-slate-500">{letter}</span>
                         <span
                           className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${isEmpty
-                              ? "bg-red-200 text-red-700"
-                              : "bg-green-200 text-green-700"
+                            ? "bg-red-200 text-red-700"
+                            : "bg-green-200 text-green-700"
                             }`}
                         >
                           {pct}%
@@ -655,22 +659,50 @@ export default function Generator() {
               This is how your product cards will appear in the PowerPoint presentation
             </p>
 
+            {/* Tag Mode Selector */}
+            <div className="mb-6 bg-white p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-semibold text-slate-800 flex items-center gap-2 text-base">
+                  <Tag className="w-4 h-4 text-blue-500" /> Tag Type
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Standard = 3 columns/slide &nbsp;|&nbsp; Long Tag = 2 columns/slide
+                </p>
+              </div>
+              <div className="flex gap-2 w-full md:w-auto">
+                <Button
+                  variant={tagMode === "standard" ? "default" : "outline"}
+                  onClick={() => { setTagMode("standard"); setPreviewPage(0); }}
+                  className={`flex-1 md:flex-none ${tagMode === "standard" ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}`}
+                >
+                  Standard Tag
+                </Button>
+                <Button
+                  variant={tagMode === "long" ? "default" : "outline"}
+                  onClick={() => { setTagMode("long"); setPreviewPage(0); }}
+                  className={`flex-1 md:flex-none ${tagMode === "long" ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}`}
+                >
+                  Long Tag
+                </Button>
+              </div>
+            </div>
+
             {/* Card Grid Preview with Pagination */}
             {(() => {
-              const PAGE_SIZE = 20; // 4 cols × 5 rows = 1 slide
+              const PAGE_SIZE = tagMode === "standard" ? 12 : 8;
               const totalPages = Math.ceil(parsedData.rows.length / PAGE_SIZE);
               const pageRows = parsedData.rows.slice(
                 previewPage * PAGE_SIZE,
                 (previewPage + 1) * PAGE_SIZE
               );
               return (
-                <div className="mb-8 bg-white rounded-lg shadow-lg p-6">
+                <div className="mb-8 bg-white rounded-lg shadow-lg p-6 border border-slate-200">
                   {/* Page header */}
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
                     <p className="text-sm text-slate-500">
                       Slide <strong className="text-slate-800">{previewPage + 1}</strong> of{" "}
                       <strong className="text-slate-800">{totalPages}</strong>{" "}
-                      &nbsp;·&nbsp; {parsedData.rows.length} products total
+                      &nbsp;·&nbsp; {parsedData.rows.length} items ({tagMode === "standard" ? "3" : "2"} cols/slide)
                     </p>
                     <div className="flex items-center gap-2">
                       <Button
@@ -695,8 +727,8 @@ export default function Generator() {
                     </div>
                   </div>
 
-                  {/* Cards */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {/* Cards Grid */}
+                  <div className={`grid gap-6 ${tagMode === "standard" ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3" : "grid-cols-1 md:grid-cols-2"}`}>
                     {pageRows.map((row, idx) => (
                       <ProductCard
                         key={previewPage * PAGE_SIZE + idx}
@@ -704,6 +736,7 @@ export default function Generator() {
                         englishName={String(row[columnMapping.englishName] || "Product")}
                         laoName={String(row[columnMapping.laoName] || "ສິນຄ້າ")}
                         barcode={String(row[columnMapping.barcode] || "123456")}
+                        tagMode={tagMode}
                       />
                     ))}
                   </div>
@@ -720,7 +753,7 @@ export default function Generator() {
                 onClick={handleGeneratePPTX}
                 disabled={isGenerating}
                 size="lg"
-                className="flex-1 bg-green-600 hover:bg-green-700"
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
               >
                 {isGenerating ? (
                   <>
@@ -728,7 +761,7 @@ export default function Generator() {
                     Generating PPTX...
                   </>
                 ) : (
-                  <>Generate & Download PPTX</>
+                  <>Generate & Download PPTX ({tagMode === "standard" ? "Standard Tag" : "Long Tag"})</>
                 )}
               </Button>
             </div>

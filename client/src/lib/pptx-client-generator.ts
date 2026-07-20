@@ -11,7 +11,11 @@ export interface ProductData {
   barcode: string;
 }
 
-export async function generatePPTXClient(products: ProductData[], onProgress?: (pct: number) => void) {
+export async function generatePPTXClient(
+  products: ProductData[], 
+  tagMode: "standard" | "long" = "standard",
+  onProgress?: (pct: number) => void
+) {
   const pres = new PptxGenJS();
   
   const slideWidth = e2i(10691813);
@@ -19,39 +23,53 @@ export async function generatePPTXClient(products: ProductData[], onProgress?: (
   pres.defineLayout({ name: 'CUSTOM', width: slideWidth, height: slideHeight });
   pres.layout = 'CUSTOM';
   
-  const cardW = e2i(2554041);
-  const cardH = e2i(1459469);
-  const cols = 4;
-  const rows = 5;
+  // ตัวคูณขนาด (Scale) 
+  // 1.15 คือขยายใหญ่ขึ้น 15% จากเดิม เพื่อให้พอดีกับกรอบพลาสติกในรูป
+  const SCALE = 1.15; 
+  
+  // กำหนดขนาดการ์ดตามโหมด
+  // โหมด 'long' จะมีความกว้างยาวพิเศษ เพื่อให้ยาวเต็มช่องใส่วินโดว์ยาว
+  const baseCardW = tagMode === "long" ? 3256000 : 2554041; // 3700000 * 0.88 = ลด 12%
+  const cardW = e2i(baseCardW * SCALE);
+  const cardH = e2i(1459469 * SCALE); // ความสูงเท่ากันทั้งสองแบบ
+  
+  // กำหนดจำนวนคอลัมน์
+  // แบบมาตรฐานจัดเรียงได้ 3 คอลัมน์, แบบยาวจัดเรียงได้ 2 คอลัมน์
+  const cols = tagMode === "long" ? 2 : 3; 
+  const rows = 4; 
   const cardsPerSlide = cols * rows;
-  const marginL = e2i(266700);
-  const marginT = e2i(190914);
   
-  // Specs for internal placement (matches python version exactly)
-  const logoW = e2i(2414041);
-  const logoH = e2i(460000);
-  const logoL = e2i(70000);
-  const logoT = e2i(40000);
+  // จัดให้อยู่กึ่งกลางหน้ากระดาษ A4 มากขึ้น
+  const marginL = tagMode === "long" ? e2i(266700 * 3.0) : e2i(266700 * 2.5);
+  const marginT = e2i(190914 * 2);
   
-  const lineW = e2i(2554041);
-  const lineH = e2i(60000);
+  // Specs for internal placement
+  const logoW = e2i(2414041 * SCALE);
+  const logoH = e2i(460000 * SCALE);
+  const logoL = e2i(70000 * SCALE);
+  const logoT = e2i(40000 * SCALE);
+  
+  const lineW = cardW; // ให้เส้นน้ำเงินยาวเต็มความกว้างการ์ด
+  const lineH = e2i(60000 * SCALE);
   const lineL = e2i(0);
-  const lineT = e2i(520000);
+  const lineT = e2i(520000 * SCALE);
   
-  const nameL = e2i(70000);
-  const nameT = e2i(650000);
-  const nameW = e2i(2414041);
-  const nameH = e2i(380000);
+  const nameL = e2i(70000 * SCALE);
+  const nameT = e2i(650000 * SCALE);
+  // ความกว้างชื่อปรับตามความยาวการ์ด โดยเว้นระยะขอบขวาไว้ 70000 * SCALE
+  const nameW = cardW - nameL - e2i(70000 * SCALE);
+  const nameH = e2i(380000 * SCALE);
   
-  const priceL = e2i(1000000);
-  const priceT = e2i(1100000);
-  const priceW = e2i(1484041);
-  const priceH = e2i(280000);
+  // ปรับตำแหน่งราคากล่องตามโหมด เพื่อให้ชิดขวาเสมอ
+  const priceL = tagMode === "long" ? e2i(1800000 * SCALE) : e2i(1000000 * SCALE);
+  const priceT = e2i(1100000 * SCALE);
+  const priceW = cardW - priceL - e2i(70000 * SCALE);
+  const priceH = e2i(280000 * SCALE);
   
-  const barcodeL = e2i(70000);
-  const barcodeT = e2i(1280000);
-  const barcodeW = e2i(1000000);
-  const barcodeH = e2i(150000);
+  const barcodeL = e2i(70000 * SCALE);
+  const barcodeT = e2i(1280000 * SCALE);
+  const barcodeW = e2i(1000000 * SCALE);
+  const barcodeH = e2i(150000 * SCALE);
 
   // Group products into slides
   for (let i = 0; i < products.length; i += cardsPerSlide) {
